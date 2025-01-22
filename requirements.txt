@@ -19,4 +19,3 @@ fpdf>=1.7.2
 textblob>=0.17.1
 
 
-os
