@@ -15,7 +15,7 @@ class Interviewer:
     """
     def __init__(self):
         try:
-            self.client = boto3.client('bedrock-runtime')
+            self.client = boto3.client('bedrock-runtime', region_name='us-east-1')
         except Exception as e:
             logging.error(f"Error inicializando el cliente de boto3: {e}")
             raise
