@@ -4,7 +4,7 @@ import json
 import boto3
 import logging
 from config import AWS_MODEL_ID, AWS_BEDROCK_VERSION
-
+import os
 # Configuración del logging (opcional, si ya lo configuras en otro lugar, podrías omitirlo aquí)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -14,11 +14,21 @@ class Interviewer:
     y evaluar respuestas durante la entrevista.
     """
     def __init__(self):
-        try:
-            self.client = boto3.client('bedrock-runtime', region_name='us-east-1')
-        except Exception as e:
-            logging.error(f"Error inicializando el cliente de boto3: {e}")
-            raise
+            try:
+                region = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+                # Solo para depurar, imprime si existen las variables (¡Cuidado de no imprimir datos sensibles en producción!)
+                if not os.environ.get("AWS_ACCESS_KEY_ID") or not os.environ.get("AWS_SECRET_ACCESS_KEY"):
+                    logging.error("Variables AWS_ACCESS_KEY_ID o AWS_SECRET_ACCESS_KEY no están definidas en el entorno.")
+                else:
+                    logging.info("Credenciales de AWS encontradas en el entorno.")
+                
+                self.client = boto3.client(
+                    'bedrock-runtime',
+                    region_name=region
+                )
+            except Exception as e:
+                logging.error(f"Error inicializando el cliente de boto3: {e}")
+                raise
 
     def generate_question(self, cv_content, position, conversation_history):
         """

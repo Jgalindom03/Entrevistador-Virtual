@@ -17,3 +17,6 @@ fpdf>=1.7.2
 
 # Análisis de sentimiento (requiere descargar corpora adicional)
 textblob>=0.17.1
+
+
+os
