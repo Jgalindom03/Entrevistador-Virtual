@@ -1,0 +1,19 @@
+# Framework y librerías de UI
+streamlit>=1.10.0
+streamlit-lottie>=0.0.3
+
+# Gráficos interactivos
+plotly>=5.0.0
+
+# Realización de peticiones HTTP
+requests>=2.25.0
+
+# Interacción con AWS y servicios cloud
+boto3>=1.20.0
+
+# Manipulación de archivos PDF
+PyPDF2>=3.0.0
+fpdf>=1.7.2
+
+# Análisis de sentimiento (requiere descargar corpora adicional)
+textblob>=0.17.1
