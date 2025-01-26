@@ -83,20 +83,29 @@ st.markdown(
 # ==============================
 # Función para exportar el PDF en memoria
 # ==============================
+
 def export_to_pdf_in_memory(content: str) -> io.BytesIO:
     """Genera un PDF en memoria a partir de texto plano."""
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    # En caso de que el texto sea muy largo, usamos multi_cell para ajustarlo a múltiples líneas
     pdf.multi_cell(0, 10, content)
-    
-    # Creamos un buffer en memoria
-    pdf_buffer = io.BytesIO()
-    pdf.output(pdf_buffer)
+
+    # Esto, en algunas versiones de FPDF, devuelve un 'str'
+    pdf_str = pdf.output(dest='S')
+
+    # Si efectivamente es 'str', lo convertimos a bytes
+    # Ajusta el encoding según lo que necesites (latin-1, utf-8, etc.)
+    if isinstance(pdf_str, str):
+        pdf_bytes = pdf_str.encode("latin-1", "ignore")
+    else:
+        # Si en tu versión ya llega en bytes, no hacemos nada
+        pdf_bytes = pdf_str
+
+    # Ahora sí lo podemos pasar a BytesIO
+    pdf_buffer = io.BytesIO(pdf_bytes)
     pdf_buffer.seek(0)
     return pdf_buffer
-
 # ==============================
 # MAIN APP
 # ==============================
