@@ -86,24 +86,33 @@ st.markdown(
 
 def export_to_pdf_in_memory(content: str) -> io.BytesIO:
     """Genera un PDF en memoria a partir de texto plano."""
+    # 1. Reemplazar caracteres conflictivos (comillas, guiones largos, etc.)
+    #   por sus equivalentes ASCII.
+    content_cleaned = (content
+                       .replace("“", '"')
+                       .replace("”", '"')
+                       .replace("’", "'")
+                       .replace("‘", "'")
+                       .replace("–", "-")
+                       .replace("—", "-")
+                       .replace("…", "..."))
+
+    # 2. Crear objeto FPDF
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.multi_cell(0, 10, content)
+    pdf.multi_cell(0, 10, content_cleaned)
 
-    # Esto, en algunas versiones de FPDF, devuelve un 'str'
-    pdf_str = pdf.output(dest='S')
+    # 3. Generar string del PDF en memoria
+    pdf_str = pdf.output(dest='S')  # Dependiendo de la versión, puede devolver str o bytes
 
-    # Si efectivamente es 'str', lo convertimos a bytes
-    # Ajusta el encoding según lo que necesites (latin-1, utf-8, etc.)
+    # 4. Asegurarnos de que 'pdf_str' sea bytes
     if isinstance(pdf_str, str):
-        pdf_bytes = pdf_str.encode("latin-1", "ignore")
-    else:
-        # Si en tu versión ya llega en bytes, no hacemos nada
-        pdf_bytes = pdf_str
+        # encode() a latin-1 ignorando caracteres no representables
+        pdf_str = pdf_str.encode('latin-1', 'ignore')
 
-    # Ahora sí lo podemos pasar a BytesIO
-    pdf_buffer = io.BytesIO(pdf_bytes)
+    # 5. Crear buffer BytesIO y retornarlo
+    pdf_buffer = io.BytesIO(pdf_str)
     pdf_buffer.seek(0)
     return pdf_buffer
 # ==============================
