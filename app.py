@@ -11,12 +11,12 @@ from interviewer import Interviewer
 from helpers import (
     get_countries_data,
     upload_and_parse_cv,
-    export_to_pdf,
     sentiment_analysis,
     load_lottieurl,
     generate_final_summary
 )
-from config import PDF_OUTPUT_PATH
+import io
+from fpdf import FPDF
 
 # Configuración del logging (opcional si ya lo configuras globalmente)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -79,6 +79,23 @@ st.markdown(
     </style>
     """, unsafe_allow_html=True
 )
+
+# ==============================
+# Función para exportar el PDF en memoria
+# ==============================
+def export_to_pdf_in_memory(content: str) -> io.BytesIO:
+    """Genera un PDF en memoria a partir de texto plano."""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    # En caso de que el texto sea muy largo, usamos multi_cell para ajustarlo a múltiples líneas
+    pdf.multi_cell(0, 10, content)
+    
+    # Creamos un buffer en memoria
+    pdf_buffer = io.BytesIO()
+    pdf.output(pdf_buffer)
+    pdf_buffer.seek(0)
+    return pdf_buffer
 
 # ==============================
 # MAIN APP
@@ -288,24 +305,24 @@ def main():
         st.plotly_chart(fig)
 
     # --------------------------
-    # Panel lateral: historial, exportar PDF, etc.
+    # Panel lateral: historial y exportar PDF
     # --------------------------
     st.sidebar.title("Historial de la entrevista")
     st.sidebar.text_area("Historial", st.session_state.conversation_history, height=300)
 
+    # Exportar PDF en memoria
     if st.sidebar.button("Exportar a PDF"):
-        pdf_path = export_to_pdf(st.session_state.conversation_history)
-        if pdf_path:
-            with open(pdf_path, "rb") as f:
-                st.sidebar.download_button(
-                    label="Descargar PDF",
-                    data=f,
-                    file_name="entrevista_resultado.pdf",
-                    mime="application/pdf"
-                )
-        else:
-            st.sidebar.error("Error al exportar el PDF.")
+        pdf_buffer = export_to_pdf_in_memory(st.session_state.conversation_history)
+        st.sidebar.download_button(
+            label="Descargar PDF",
+            data=pdf_buffer,
+            file_name="entrevista_resultado.pdf",
+            mime="application/pdf"
+        )
 
+    # --------------------------
+    # Búsqueda de empleos en plataformas externas
+    # --------------------------
     st.sidebar.markdown("## Buscar empleos similares en plataformas externas")
     if st.session_state.position:
         position_query = urllib.parse.quote(st.session_state.position)
